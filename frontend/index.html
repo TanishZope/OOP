@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hospital Appointment System</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><div class="brand"><b>✚</b><div><h1>Hospital Appointment System</h1><p>Better Care · Healthier Tomorrow</p></div></div><span>CITY CARE HOSPITAL<br><small id="serverStatus">Checking C++ server…</small></span></header>
+<nav><button data-go="top">Home</button><button data-go="booking">Add Appointment</button><button data-go="appointments">View Appointments</button><button data-go="search">Search</button><button data-go="saved">Saved Records</button></nav>
+<main id="top">
+<section class="hero"><h2>Welcome to City Care Hospital</h2><p>Book, manage and track appointments from one place.</p></section>
+<section class="stats"><article>Total Appointments<strong id="totalCount">0</strong></article><article>Active Appointments<strong id="activeCount">0</strong></article><article>Cancelled Appointments<strong id="cancelledCount">0</strong></article></section>
+<div class="columns">
+<section class="panel" id="booking"><h2>＋ Book an Appointment</h2><form id="bookingForm" class="formgrid">
+<label>Patient Name<input id="patientName" maxlength="80" required placeholder="Patient name"></label>
+<label>Patient Age<input id="age" type="number" min="1" max="120" required placeholder="Age"></label>
+<label>Doctor Name<input id="doctorName" maxlength="80" required placeholder="Doctor name"></label>
+<label>Appointment Date<input id="date" type="date" required></label>
+<label>Appointment Time<input id="time" type="time" required></label>
+<div class="actions"><button class="primary">Book Appointment</button><button type="reset" class="muted">Reset</button></div></form></section>
+<div>
+<section class="panel" id="search"><h2>⌕ Search Appointment</h2><form id="searchForm" class="pad"><label>Appointment ID<input id="searchId" type="number" min="1" required></label><button class="primary full">Search</button></form><pre id="searchResult" class="result hidden"></pre></section>
+<section class="panel"><h2>Cancel Appointment</h2><form id="cancelForm" class="pad"><label>Appointment ID<input id="cancelId" type="number" min="1" required></label><button class="danger full">Cancel Appointment</button></form></section>
+</div></div>
+<section class="panel" id="appointments"><div class="heading"><h2>Appointment List</h2><button id="refreshButton" class="muted">↻ Refresh</button></div><div class="scroll"><table><thead><tr><th>ID</th><th>Patient</th><th>Age</th><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr></thead><tbody id="appointmentRows"></tbody></table></div><p id="emptyMessage" class="empty">No appointments found.</p></section>
+<section class="panel" id="saved"><div class="heading"><h2>Saved Records (C++ backend)</h2><button id="exportButton" class="success">Export TXT</button></div><pre id="savedRecords" class="saved">Loading…</pre></section>
+<footer>College Project Demonstration · C++ · HTML · CSS · JavaScript</footer></main><div id="toast" class="toast"></div><script src="script.js"></script></body></html>

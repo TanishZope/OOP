@@ -1,0 +1,20 @@
+const API="http://localhost:18080/api";
+const $=id=>document.getElementById(id);
+let appointments=[];
+async function api(path,options={}){const r=await fetch(API+path,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||`HTTP ${r.status}`);return d}
+function toast(msg,error=false){let e=$("toast");e.textContent=msg;e.className="toast"+(error?" error":"");e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",3000)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function dt(d){if(!d)return"";let[y,m,day]=d.split("-");return `${day}-${m}-${y}`}
+function tm(t){if(!t)return"";let[h,m]=t.split(":").map(Number),p=h>=12?"PM":"AM";h=h%12||12;return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")} ${p}`}
+function line(a){return `ID: ${a.id} | Patient: ${a.name} | Age: ${a.age} | Doctor: ${a.doctor} | Date: ${dt(a.date)} | Time: ${tm(a.time)} | Status: ${a.active?"Booked":"Cancelled"}`}
+async function load(){try{appointments=await api("/appointments");$("serverStatus").textContent="● C++ server connected";render()}catch(e){$("serverStatus").textContent="● C++ server not connected";toast("Start the C++ backend and refresh.",true)}}
+function render(){$("totalCount").textContent=appointments.length;$("activeCount").textContent=appointments.filter(a=>a.active).length;$("cancelledCount").textContent=appointments.filter(a=>!a.active).length;$("appointmentRows").innerHTML=appointments.map(a=>`<tr><td>${a.id}</td><td>${esc(a.name)}</td><td>${a.age}</td><td>${esc(a.doctor)}</td><td>${dt(a.date)}</td><td>${tm(a.time)}</td><td><span class="pill ${a.active?"booked":"cancelled"}">${a.active?"Booked":"Cancelled"}</span></td><td><button class="small muted" onclick="view(${a.id})">View</button><button class="small danger" onclick="cancel(${a.id})" ${a.active?"":"disabled"}>Cancel</button></td></tr>`).join("");$("emptyMessage").hidden=appointments.length>0;$("savedRecords").textContent=appointments.length?appointments.map(line).join("\n\n"):"No saved records."}
+$("bookingForm").addEventListener("submit",async e=>{e.preventDefault();let data={name:$("patientName").value.trim(),age:Number($("age").value),doctor:$("doctorName").value.trim(),date:$("date").value,time:$("time").value};if(!data.name||!data.doctor||!data.date||!data.time||!Number.isInteger(data.age)||data.age<1||data.age>120){toast("Enter all details and a valid age (1–120).",true);return}try{let a=await api("/appointments",{method:"POST",body:JSON.stringify(data)});e.target.reset();await load();toast("Appointment booked. ID: "+a.id);view(a.id)}catch(x){toast(x.message,true)}});
+$("searchForm").addEventListener("submit",async e=>{e.preventDefault();try{let a=await api("/appointments/"+Number($("searchId").value));$("searchResult").classList.remove("hidden");$("searchResult").textContent=line(a)}catch(x){$("searchResult").classList.remove("hidden");$("searchResult").textContent=x.message}});
+function view(id){let a=appointments.find(x=>x.id===id);if(a){$("searchId").value=id;$("searchResult").classList.remove("hidden");$("searchResult").textContent=line(a);$("search").scrollIntoView({behavior:"smooth",block:"center"})}}
+async function cancel(id){if(!confirm("Cancel appointment ID "+id+"?"))return;try{await api(`/appointments/${id}/cancel`,{method:"POST",body:"{}"});await load();toast("Appointment cancelled.")}catch(e){toast(e.message,true)}}
+$("cancelForm").addEventListener("submit",e=>{e.preventDefault();cancel(Number($("cancelId").value))});
+$("refreshButton").addEventListener("click",load);
+$("exportButton").addEventListener("click",()=>{let b=new Blob([appointments.map(line).join("\n")],{type:"text/plain"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="appointments.txt";a.click();URL.revokeObjectURL(u)});
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>{let id=b.dataset.go;(id==="top"?document.documentElement:$(id)).scrollIntoView({behavior:"smooth"})}));
+load();
